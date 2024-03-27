@@ -49,7 +49,7 @@ spec:
 ---
 ## 데이터 수집
 * ubuntu, orin server 에서 netperf 실행
-* 실험 스크립트
+* 실험 스크립트 (core random)
   * collect_data.sh
 ```sh
 #!/bin/bash
@@ -94,8 +94,49 @@ done
 * mpstat은 리눅스 서버의 cpu 코어 별 사용량 모니터링 툴로써 netperf 가 실행될 때 사용되는 core 별 cpu 사용량을 측정
 * 정확한 측정을 위하여 netperf 를 실행 한 후 측정이 끝나면 netperf 를 종료한 후 다시 netperf 를 실행하였다 ( netperf가 여러 process에서 실행되는걸 방지 )
 
+* 실험 스크립트 (core pinning)
+  * collect_data2.sh 
+```sh
+#!/bin/bash
 
-
-
+pkt=64
+for i in $(seq 0 3)
+    for j in $(seq 1 5)
+    do
+        mkdir $1/p${pkt}
+        echo $pkt
+        # Start Netperf
+        kubectl exec -it p1 --namespace=default -- taskset -c {j} netperf -H 192.168.0.3 -p 12865 -l 500 -- -m "${pkt}" &
+    
+        # Wait for netperf to start
+        sleep 5
+    
+        # Collect Data 12times
+        for k in $(seq 1 12)
+        do
+            # Collect data
+            kubectl exec -it p1 --namespace=default -- vnstat -tr 10 |awk '/tx/' |awk '{print $2, $4}' >> $1/p${pkt}/vnstat.txt&
+            sshpass -p ???? ssh -o StrictHostKeyChecking=no ubuntu2@155.230.16.157 -p 40003 "pidstat -G netperf 1 10" |awk '/Average/'|awk '/netperf/'|awk '{ print $8 }'  >> $1/p${pkt}/pidstat_netperf.txt&
+            kubectl exec -it p1 --namespace=default -- mpstat -P ALL 10 1 >> $1/p${pkt}/mpstat.txt
+            # Wait before collecting the next set of data 
+            sleep 3
+        done
+    
+        # pkt * 2
+        ((pkt=${pkt}*2))
+    
+        # Stop netperf
+        sshpass -p ???? ssh -o StrictHostKeyChecking=no ubuntu2@155.230.16.157 -p 40003 sudo killall netperf
+    
+        sleep 1
+        # Increment packet size
+    done
+done
+```
+* taskset은 process가 사용할 cpu core 를 지정하게 한다 (cpu affinity) 
+* collect_data.sh 에서  taskset 명령어를 통하여 netperf가 실행하는 core pinning
+* taskset -c (지정할 코어) "command" -> 지정된 코어에서 명령어 실행
+* 위에 코드는 core가 4개인 raspberry pi 실험이기에 0~3 core에서 데이터 측정
+* orin의 경우 core가 6개이므로 0~5 core에서 데이터 측정
 
 
