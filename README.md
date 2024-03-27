@@ -2,6 +2,7 @@
 ## 실험 환경
 
 * 엣지 장치로 raspberry pi 와 jetson orin nano 를 선책하여 이를 비교 관찰 하였음
+* kubernetes version : 1.28.2 (전부 다)
 * 서버 환경
   * Intel(R) Core(TM) i7-10700K CPU 16코어 @ 3.80GHz와 64 GB 메모리 탑재
   * Linux version : Ubuntu 22.04.3 LTS, kernel version : 5.15.0-91-generic
