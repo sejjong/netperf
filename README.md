@@ -1,7 +1,7 @@
 # 엣지 컴퓨팅 환경에서 CPU 스케줄링이 네트워크 성능에 미치는 영향 분석
 ## 실험 환경
 
-* 엣지 장치로 raspberry pi 와 jetson orin nano 를 선책하여 이를 비교 관찰 하였음
+* 엣지 장치로 raspberry pi 와 jetson orin nano 를 선택하여 이를 비교 관찰 하였음
 * kubernetes version : 1.28.2 (전부 다)
 * 서버 환경
   * Intel(R) Core(TM) i7-10700K CPU 16코어 @ 3.80GHz와 64 GB 메모리 탑재
@@ -20,7 +20,7 @@
 * rasberry pi 와 jetson orin nano 에서 각각 pod 를 생성하여 pod 에서 server로 netperf 를 실행 한 후 pod 의 네트워크 처리량 관찰
 ---
 ## 데이터 수집을 위한 환경 세팅
-* kubernete cluster 환경 구성 ( gpu server - master, ubuntu server - worker, orin server - worker )
+* kubernete cluster 환경 구성 ( gpu server - master, ubuntu - worker, orin - worker )
 * gpu server(master) 에서 netserver 실행
     * netserver
     * 그냥 실행 시 default 로 port 12865 지정
